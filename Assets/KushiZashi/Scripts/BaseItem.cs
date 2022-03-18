@@ -1,64 +1,112 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.Triggers;
+using Manager;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BaseItem : MonoBehaviour
 {
     [SerializeField] private string _name;
     [SerializeField] private Vector3 _initialVelocity;
+    [SerializeField] private int _price;
+    [SerializeField] private float _cookTime;
+    [SerializeField] private Material _cookedMat;
+    [SerializeField] private Material _defaultMat;
+    [SerializeField] private Sprite _icon;
 
     private readonly Subject<Unit> _finishedSubject = new Subject<Unit>();
     private Rigidbody _rigidbody;
     private KushiManager _kushi;
+    private IDisposable _cookDisposable;
+    private IDisposable _kushiDisposable;
+    private Renderer _renderer;
+    private bool _isCooked = false;
+    private Transform _root;
     
     //オブジェクトを使い終わったことを通知する
     public IObservable<Unit> OnFinishedAsync => _finishedSubject;
 
-    private async void Start()
+    public int Price => _price;
+    public string Name => _name;
+    public bool IsCooked
     {
-        _rigidbody = this.GetComponent<Rigidbody>();
-        
-        this.OnTriggerEnterAsObservable()
-            .Where(x => x.gameObject.TryGetComponent<KushiManager>(out _kushi))
-            .Subscribe(_ => OnHit())
-            .AddTo(this);
-
-        this.UpdateAsObservable()
-            .Where(_ => transform.position.y < 0f)
-            .Subscribe(_ => Finish())
-            .AddTo(this);
+        get => _isCooked;
+        set => _isCooked = value;
     }
 
+    public Sprite Icon => _icon;
+    public Transform Root => _root;
+
+    private void Start()
+    {
+        _root = transform.parent;
+    }
+
+    /// <summary>
+    /// Instantiate時とObjectPoolからのRent時の初期化処理
+    /// </summary>
+    /// <param name="initPosition"></param>
+    /// <param name="initRotation"></param>
     public void Initialize(Vector3 initPosition, Vector3 initRotation)
     {
         transform.position = initPosition;
         transform.Rotate(initRotation);
 
+        //初速度をかける
+        _rigidbody = this.GetComponent<Rigidbody>();
         Observable.NextFrame(FrameCountType.FixedUpdate)
             .TakeUntilDisable(this)
             .Subscribe(_ =>
             {
                 _rigidbody.AddForce(_initialVelocity, ForceMode.VelocityChange);
             });
+
+        //串に衝突するイベント
+        _kushiDisposable = this.OnTriggerEnterAsObservable()
+            .Where(x => x.gameObject.TryGetComponent<KushiManager>(out _kushi))
+            .ThrottleFrame(1)
+            .Do(_ => Debug.Log("衝突"))
+            .Subscribe(_ => OnHit())
+            .AddTo(this);
+
+        //焼くイベント
+        _renderer = this.GetComponent<Renderer>();
+        _cookDisposable = this.OnTriggerEnterAsObservable()
+            .Where(x => x.CompareTag("Fire"))
+            .SelectMany(_ => Observable.Interval(TimeSpan.FromSeconds(_cookTime)))
+            .TakeUntil(this.OnTriggerExitAsObservable())
+            .RepeatUntilDestroy(this.gameObject)
+            .Subscribe(_ => OnCook());
+
+        //刺さらずに下に落ちたやつのイベント
+        this.UpdateAsObservable()
+            .Where(_ => transform.position.y < 0f)
+            .Subscribe(_ => Finish())
+            .AddTo(this);
     }
 
+    /// <summary>
+    /// 串との衝突時の処理
+    /// </summary>
     private async void OnHit()
     {
+        _kushiDisposable.Dispose();
+        //いろいろなところに追加
         this.transform.SetParent(_kushi.transform);
         _kushi.StockItems.Add(this);
         
+        //動きを制限
         _rigidbody.constraints = RigidbodyConstraints.FreezeRotation
                                 |RigidbodyConstraints.FreezePositionX
                                 |RigidbodyConstraints.FreezePositionZ;
         
+        //位置調整
         transform.position = new Vector3(_kushi.transform.position.x, transform.position.y,
             _kushi.transform.position.z);
         
+        //空のときは串の下の方で止める
         if (_kushi.isEmpty)
         {
             await UniTask.WaitUntil(() => transform.position.y <= 5);
@@ -68,12 +116,34 @@ public class BaseItem : MonoBehaviour
     }
 
     /// <summary>
+    /// 火を通すときの処理
+    /// </summary>
+    private void OnCook()
+    {
+        _renderer.material = _cookedMat;
+        _isCooked = true;
+        
+        _cookDisposable.Dispose();
+        Debug.Log("cooked");
+    }
+
+    /// <summary>
     /// インスタンスを使い終わったときに実行する
     /// </summary>
-    private void Finish()
+    public void Finish()
     {
+        //Observable, UniTask破棄
+        _kushiDisposable.Dispose();
+        _cookDisposable.Dispose();
+        
         //速度を初期化
         _rigidbody.velocity = Vector3.zero;
+        
+        //移動制限を初期化
+        _rigidbody.constraints = RigidbodyConstraints.None;
+        
+        //マテリアルを初期化
+        _renderer.material = _defaultMat;
         
         //イベント発行
         _finishedSubject.OnNext(Unit.Default);
@@ -82,5 +152,25 @@ public class BaseItem : MonoBehaviour
     private void OnDestroy()
     {
         _finishedSubject.Dispose();
+    }
+    
+    //objと自分自身が等価のときはtrueを返す
+    public override bool Equals(object obj)
+    {
+        //objがnullか、型が違うときは、等価でない
+        if (obj == null || this.GetType() != obj.GetType())
+        {
+            return false;
+        }
+
+        //Numberで比較する
+        BaseItem c = (BaseItem)obj;
+        return (this.Name == c.Name && this._isCooked == c._isCooked);
+    }
+
+    //Equalsがtrueを返すときに同じ値を返す
+    public override int GetHashCode()
+    {
+        return this.Name.GetHashCode() ^ this._isCooked.GetHashCode();
     }
 }

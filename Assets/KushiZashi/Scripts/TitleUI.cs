@@ -12,20 +12,13 @@ public class TitleUI : MonoBehaviour
 {
     [SerializeField] private Button _startButton;
 
-    private GameManager _gameManager;
-
-    private void Awake()
-    {
-        _gameManager = GameObject.Find(Const.GameManager).GetComponent<GameManager>();
-    }
-
     private void Start()
     {
         _startButton.OnClickAsObservable()
             .Subscribe(_ =>
             {
-                _gameManager.GameState.Value = GameState.Initializing;
                 SceneManager.LoadScene(Const.MainScene);
+                GameManager.gameManager.GameState.Value = GameState.Initializing;
             }).AddTo(this);
     }
 }

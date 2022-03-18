@@ -11,6 +11,8 @@ using Random = UnityEngine.Random;
 
 public class ItemGenerator : MonoBehaviour
 {
+    public List<ItemObjectPoolProvider> ItemObjectPoolProviders => _itemObjectPoolProviders;
+    
     [SerializeField] private List<ItemObjectPoolProvider> _itemObjectPoolProviders = new List<ItemObjectPoolProvider>();
 
     [SerializeField] private float _radius = 3f;
@@ -19,15 +21,12 @@ public class ItemGenerator : MonoBehaviour
 
     [SerializeField] private float _maxSpan;
 
-    private GameManager _gameManager;
-
     private CancellationToken _ct;
 
     private List<ItemObjectPool> _itemObjectPools = new List<ItemObjectPool>();
     
     void Awake()
     {
-        _gameManager = GameObject.Find(Const.GameManager).GetComponent<GameManager>();
         _ct = this.GetCancellationTokenOnDestroy();
 
         for (int i = 0; i < _itemObjectPoolProviders.Count; i++)
@@ -39,6 +38,13 @@ public class ItemGenerator : MonoBehaviour
     async void Start()
     {
         var span = Random.Range(_minSpan, _maxSpan);
+
+        //InGame待ち
+        await GameManager.gameManager.GameState
+            .Where(x => x == GameState.InGame)
+            .ToUniTask(true, _ct);
+        
+        //ランダムな間隔でアイテム生成
         await UniTaskAsyncEnumerable
             .Interval(TimeSpan.FromSeconds(span))
             .ForEachAsync(_ =>

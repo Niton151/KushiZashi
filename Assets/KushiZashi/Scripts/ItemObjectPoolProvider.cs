@@ -9,6 +9,8 @@ using UniRx;
 /// </summary>
 public class ItemObjectPoolProvider : MonoBehaviour
 {
+    public BaseItem Item => _prefab;
+    
     [SerializeField] private BaseItem _prefab;
 
     private ItemObjectPool _objectPool;

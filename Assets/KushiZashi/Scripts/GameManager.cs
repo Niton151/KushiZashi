@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
@@ -19,9 +20,14 @@ namespace Manager
 
     public class GameManager : SingletonMonoBehaviour<GameManager>
     {
+        public static GameManager gameManager => Instance;
+        
         public ReactiveProperty<GameState> GameState = new ReactiveProperty<GameState>(Manager.GameState.Title);
 
-        
+        public ItemGenerator ItemGenerator { get; private set; }
+
+        public KushiManager Kushi { get; private set; }
+
         private CancellationToken ct;
 
         private void Awake()
@@ -32,6 +38,7 @@ namespace Manager
 
         async void Start()
         {
+            //GameState管理
             await GameState.ToUniTaskAsyncEnumerable().ForEachAwaitAsync(async _ =>
             {
                 switch (GameState.Value)
@@ -64,10 +71,12 @@ namespace Manager
         /// MainSceneの初期化処理
         /// </summary>
         /// <returns></returns>
-        private UniTask MainInitialize()
+        private async UniTask MainInitialize()
         {
-            //ここに処理を書く
-            return UniTask.Delay(TimeSpan.FromSeconds(3f));
+            await UniTask.Delay(TimeSpan.FromSeconds(1f));
+            //ここに初期化処理を書く
+            ItemGenerator = GameObject.Find(Const.ItemGenerator).GetComponent<ItemGenerator>();
+            Kushi = GameObject.Find(Const.Kushi).GetComponent<KushiManager>();
         }
     }
 }
