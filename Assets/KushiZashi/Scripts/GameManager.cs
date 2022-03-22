@@ -21,18 +21,16 @@ namespace Manager
     public class GameManager : SingletonMonoBehaviour<GameManager>
     {
         public static GameManager gameManager => Instance;
-        
         public ReactiveProperty<GameState> GameState = new ReactiveProperty<GameState>(Manager.GameState.Title);
-
         public ItemGenerator ItemGenerator { get; private set; }
-
         public KushiManager Kushi { get; private set; }
+        public PaymentManager PaymentManager { get; private set; }
 
-        private CancellationToken ct;
+        private CancellationToken _ct;
 
         private void Awake()
         {
-            ct = this.GetCancellationTokenOnDestroy();
+            _ct = this.GetCancellationTokenOnDestroy();
             DontDestroyOnLoad(this.gameObject);
         }
 
@@ -64,7 +62,7 @@ namespace Manager
                         Debug.Log("Result");
                         break;
                 }
-            }, cancellationToken:ct);
+            }, cancellationToken:_ct);
         }
 
         /// <summary>
@@ -73,10 +71,11 @@ namespace Manager
         /// <returns></returns>
         private async UniTask MainInitialize()
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(1f));
+            await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: _ct);
             //ここに初期化処理を書く
             ItemGenerator = GameObject.Find(Const.ItemGenerator).GetComponent<ItemGenerator>();
             Kushi = GameObject.Find(Const.Kushi).GetComponent<KushiManager>();
+            PaymentManager = GameObject.Find(Const.PaymentManager).GetComponent<PaymentManager>();
         }
     }
 }

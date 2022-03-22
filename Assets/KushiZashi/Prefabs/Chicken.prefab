@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 549376445721475983}
   - component: {fileID: 549376445721475981}
   - component: {fileID: 3541676054386934624}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Chicken
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 549376445721475980}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.5910089, y: 12.868788, z: -8.867582}
-  m_LocalScale: {x: 50, y: 50, z: 50}
+  m_LocalScale: {x: 40, y: 40, z: 40}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -49,7 +49,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _name: Chicken
   _initialVelocity: {x: 0, y: 0, z: 0}
-  _price: 0
+  _price: 40
   _cookTime: 3
   _cookedMat: {fileID: 2100000, guid: c8cbc42d7ff499f4194c63cd9b505f2c, type: 2}
   _defaultMat: {fileID: 2100000, guid: 3cc044079bac4884f9ea0c0e80e5cd05, type: 2}
@@ -118,7 +118,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!135 &3541676054386934624
 SphereCollider:
   m_ObjectHideFlags: 0

@@ -38,7 +38,8 @@ public class Pointer : MonoBehaviour
                 marker.SetActive(x);
                 marker.transform.position = hitInfo.point;
                 marker.transform.LookAt(this.transform);
-            });
+            })
+            .AddTo(this);
     }
 
     private void Update()

@@ -1,5 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.Linq;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
@@ -7,11 +10,11 @@ using Manager;
 
 public class KushiMove : MonoBehaviour
 {
-    private GameManager _gameManager;
-    
+    private Camera _camera;
+
     void Awake()
     {
-        _gameManager = GameObject.Find(Const.GameManager).GetComponent<GameManager>();
+        _camera = Camera.main;
         Initialize();
     }
     
@@ -26,11 +29,9 @@ public class KushiMove : MonoBehaviour
             .Subscribe(v =>
             {
                 v.z = 11f;  //z座標は適当にセット
-                var position = Camera.main.ScreenToWorldPoint(v);
+                var position = _camera.ScreenToWorldPoint(v);
                 gameObject.transform.position = position;
-            });
-    }
-    void Update()
-    {
+            })
+            .AddTo(this);
     }
 }

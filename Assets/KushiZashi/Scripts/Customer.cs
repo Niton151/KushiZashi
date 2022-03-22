@@ -26,15 +26,21 @@ public class Customer : MonoBehaviour
 
     private List<Button> _panels;
     private List<List<Image>> _images = new List<List<Image>>();
+    private Slider _timeSlider;
 
     [SerializeField] private Sprite _defaultIcon;
 
     private KushiManager _kushi;
+    private PaymentManager _paymentManager;
+
+    public Subject<Unit> OnFinish => _onFinishSubject;
+    private Subject<Unit> _onFinishSubject = new Subject<Unit>();
 
     private void Awake()
     {
         _kushi = GameManager.gameManager.Kushi;
-        
+        _paymentManager = GameManager.gameManager.PaymentManager;
+
         //注文内容を表示するためののImageを取得
         var parent = GameObject.Find("OrderBack");
         _panels = parent.GetComponentsInChildren<Button>().ToList();
@@ -42,6 +48,9 @@ public class Customer : MonoBehaviour
         {
             _images.Add(t.GetComponentsInChildren<Image>().Skip(1).ToList());
         }
+
+        //タイマーのSlider初期化
+        _timeSlider = parent.GetComponentInChildren<Slider>();
     }
 
     /// <summary>
@@ -55,6 +64,7 @@ public class Customer : MonoBehaviour
         _orderCount = orderCount;
         _timeLimit = timeLimit;
         _lengthRange = lengthRange;
+        _timeSlider.maxValue = _timeLimit;
 
         _cts = new CancellationTokenSource();
 
@@ -80,7 +90,12 @@ public class Customer : MonoBehaviour
         //時間制限
         _disposable = this.UpdateAsObservable()
             .Where(_ => timer <= _timeLimit)
-            .Subscribe(_ => timer += Time.deltaTime);
+            .Subscribe(_ =>
+            {
+                timer += Time.deltaTime;
+                _timeSlider.value = _timeLimit - timer;
+            })
+            .AddTo(this);
 
         //完成するか制限時間になるかを待つ
         await UniTask.WhenAny(
@@ -106,9 +121,19 @@ public class Customer : MonoBehaviour
         {
             if (i < _orderCount)
             {
-                await _panels[i].OnClickAsync();
+                await _panels[i].OnClickAsync(_cts.Token);
                 if (_menus[i].MenuList.SequenceEqual(_kushi.StockItems))
                 {
+                    //icon削除
+                    _images[i].ForEach(x => x.sprite = _defaultIcon);
+                    //串をclear
+                    foreach (var item in _kushi.StockItems)
+                    {
+                        _kushi.isEmpty = true;
+                        item.transform.SetParent(item.Root);
+                        item.Finish();
+                    }
+                    _kushi.StockItems.Clear();
                     break;
                 }
             }
@@ -139,14 +164,17 @@ public class Customer : MonoBehaviour
     /// </summary>
     private void Exit()
     {
+        //成功時
         if (timer < _timeLimit)
         {
-            _kushi.StockItems.ForEach(x =>
+            foreach (var item in _kushi.StockItems)
             {
                 _kushi.isEmpty = true;
-                x.transform.SetParent(x.Root);
-                x.Finish();
-            });
+                item.transform.SetParent(item.Root);
+                item.Finish();
+            }
+            _kushi.StockItems.Clear();
+            _paymentManager.AddMoney(_menus.Select(x => x.SumPrice).Sum());
         }
 
         _images.ForEach(x => x.ForEach(y => y.sprite = _defaultIcon));
@@ -156,6 +184,7 @@ public class Customer : MonoBehaviour
         _cts.Dispose();
         timer = 0;
         Debug.Log("exit");
+        _onFinishSubject.OnNext(Unit.Default);
     }
 
     private void OnDestroy()

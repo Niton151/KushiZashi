@@ -78,7 +78,8 @@ public class ItemGenerator : MonoBehaviour
             .Subscribe(_ =>
             {
                 _itemObjectPools[randomIndex].Return(item);
-            });
+            })
+            .AddTo(this);
     }
 
     private void OnDrawGizmosSelected()

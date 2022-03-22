@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Manager;
 using UniRx;
@@ -24,6 +25,7 @@ public class BaseItem : MonoBehaviour
     private Renderer _renderer;
     private bool _isCooked = false;
     private Transform _root;
+    private CancellationToken _ct;
     
     //オブジェクトを使い終わったことを通知する
     public IObservable<Unit> OnFinishedAsync => _finishedSubject;
@@ -41,7 +43,9 @@ public class BaseItem : MonoBehaviour
 
     private void Start()
     {
+        _kushi = GameManager.gameManager.Kushi;
         _root = transform.parent;
+        _ct = this.GetCancellationTokenOnDestroy();
     }
 
     /// <summary>
@@ -65,10 +69,16 @@ public class BaseItem : MonoBehaviour
 
         //串に衝突するイベント
         _kushiDisposable = this.OnTriggerEnterAsObservable()
-            .Where(x => x.gameObject.TryGetComponent<KushiManager>(out _kushi))
+            .Where(x => x.gameObject.CompareTag("Kushi"))
             .ThrottleFrame(1)
-            .Do(_ => Debug.Log("衝突"))
             .Subscribe(_ => OnHit())
+            .AddTo(this);
+        
+        //串をずらすイベント
+        this.OnTriggerStayAsObservable()
+            .Where(x => x.gameObject.CompareTag("Kushi"))
+            .Where(_ => !_kushi.isEmpty)
+            .Subscribe(_ => _kushi.StockItems[0].transform.position += Vector3.down * Time.deltaTime)
             .AddTo(this);
 
         //焼くイベント
@@ -78,11 +88,12 @@ public class BaseItem : MonoBehaviour
             .SelectMany(_ => Observable.Interval(TimeSpan.FromSeconds(_cookTime)))
             .TakeUntil(this.OnTriggerExitAsObservable())
             .RepeatUntilDestroy(this.gameObject)
-            .Subscribe(_ => OnCook());
+            .Subscribe(_ => OnCook())
+            .AddTo(this);
 
         //刺さらずに下に落ちたやつのイベント
         this.UpdateAsObservable()
-            .Where(_ => transform.position.y < 0f)
+            .Where(_ => transform.position.y < -20f)
             .Subscribe(_ => Finish())
             .AddTo(this);
     }
@@ -109,7 +120,7 @@ public class BaseItem : MonoBehaviour
         //空のときは串の下の方で止める
         if (_kushi.isEmpty)
         {
-            await UniTask.WaitUntil(() => transform.position.y <= 5);
+            await UniTask.WaitUntil(() => transform.position.y <= 8, cancellationToken: _ct);
             _rigidbody.constraints = RigidbodyConstraints.FreezeAll;
             _kushi.isEmpty = false;
         }
