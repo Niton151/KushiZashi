@@ -13,28 +13,21 @@ public class CustomerProvider : MonoBehaviour
 {
     [SerializeField] private Customer _prefab;
 
+    private Customer _customer;
     private CancellationToken _ct;
     
-    private void Start()
+    public void FirstInit()
     {
         _ct = this.GetCancellationTokenOnDestroy();
-        
-        //InGameまで待つ
-        GameManager.gameManager.GameState
-            .Where(x => x == GameState.InGame)
-            .Subscribe(_ => Init())
-            .AddTo(this);
+        _customer = Instantiate(_prefab, this.gameObject.transform);
     }
 
-    async void Init()
+    public void OpenInit(CancellationToken ctOnClose)
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(3f), cancellationToken: _ct);
-
-        var customer = Instantiate(_prefab, this.gameObject.transform);
-        customer.Initialize(1, 30, lengthRange:(3, 5));
+        _customer.Initialize(1, 10, lengthRange:(3, 5), ctOnClose);
 
         //客の入れ替え処理
-        customer.OnFinish
+        _customer.OnFinish
             .ToUniTaskAsyncEnumerable()
             .ForEachAsync(_ =>
             {
@@ -43,7 +36,7 @@ public class CustomerProvider : MonoBehaviour
                 var min = Random.Range(1, 3);
                 var max = Random.Range(min, 8);
                 var time = (int)(30 + (count - 1) * (max + min) * 0.5 * 5);
-                customer.Initialize(count, time, (min, max));
-            }, _ct);
+                _customer.Initialize(count, time, (min, max), ctOnClose);
+            }, ctOnClose);
     }
 }

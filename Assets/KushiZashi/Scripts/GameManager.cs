@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using UniRx;
 using UnityEngine;
+using Progress = UnityEditor.Progress;
 
 namespace Manager
 {
@@ -13,6 +14,8 @@ namespace Manager
         Title,
         Initializing,
         InGame,
+        Open,
+        Close,
         Menu,
         Cleaning,
         Result
@@ -25,6 +28,11 @@ namespace Manager
         public ItemGenerator ItemGenerator { get; private set; }
         public KushiManager Kushi { get; private set; }
         public PaymentManager PaymentManager { get; private set; }
+        public TimeManager TimeManager { get; private set; }
+        public StoreManager StoreManager { get; private set; }
+        public CustomerProvider CustomerProvider { get; private set; }
+
+        private CancellationTokenSource _ctsOnClose;
 
         private CancellationToken _ct;
 
@@ -37,32 +45,46 @@ namespace Manager
         async void Start()
         {
             //GameState管理
-            await GameState.ToUniTaskAsyncEnumerable().ForEachAwaitAsync(async _ =>
+            await GameState.ToUniTaskAsyncEnumerable().Skip(1).ForEachAwaitAsync(async _ =>
             {
                 switch (GameState.Value)
                 {
-                    case Manager.GameState.Title :
+                    case Manager.GameState.Title:
                         Debug.Log("Title");
                         break;
-                    case Manager.GameState.Initializing :
+                    case Manager.GameState.Initializing:
                         Debug.Log("Initializing");
                         await MainInitialize();
                         GameState.Value = Manager.GameState.InGame;
                         break;
-                    case Manager.GameState.InGame :
+                    case Manager.GameState.InGame:
                         Debug.Log("InGame");
+                        await StoreManager.IsOpen.Where(x => x).ToUniTask(true, _ct);
+                        GameState.Value = Manager.GameState.Open;
                         break;
-                    case Manager.GameState.Menu :
+                    case Manager.GameState.Open:
+                        Debug.Log("Open");
+                        await OpenInitialize();
+                        await StoreManager.IsOpen.Where(x => !x).ToUniTask(true, _ct);
+                        GameState.Value = Manager.GameState.Close;
+                        break;
+                    case Manager.GameState.Close:
+                        Debug.Log("Close");
+                        _ctsOnClose.Cancel();
+                        await StoreManager.IsOpen.Where(x => x).ToUniTask(true, _ct);
+                        GameState.Value = Manager.GameState.Open;
+                        break;
+                    case Manager.GameState.Menu:
                         Debug.Log("Menu");
                         break;
-                    case Manager.GameState.Cleaning :
+                    case Manager.GameState.Cleaning:
                         Debug.Log("End");
                         break;
-                    case Manager.GameState.Result :
+                    case Manager.GameState.Result:
                         Debug.Log("Result");
                         break;
                 }
-            }, cancellationToken:_ct);
+            }, cancellationToken: _ct);
         }
 
         /// <summary>
@@ -71,11 +93,33 @@ namespace Manager
         /// <returns></returns>
         private async UniTask MainInitialize()
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(1f), cancellationToken: _ct);
             //ここに初期化処理を書く
             ItemGenerator = GameObject.Find(Const.ItemGenerator).GetComponent<ItemGenerator>();
+            ItemGenerator.FirstInit();
+
             Kushi = GameObject.Find(Const.Kushi).GetComponent<KushiManager>();
+            Kushi.FirstInit();
+
             PaymentManager = GameObject.Find(Const.PaymentManager).GetComponent<PaymentManager>();
+            PaymentManager.FirstInit();
+
+            TimeManager = GameObject.Find(Const.TimeManager).GetComponent<TimeManager>();
+            TimeManager.FirstInit();
+
+            StoreManager = GameObject.Find(Const.StoreManager).GetComponent<StoreManager>();
+            StoreManager.FirstInit();
+
+            CustomerProvider = GameObject.Find(Const.CustomerProvider).GetComponent<CustomerProvider>();
+            CustomerProvider.FirstInit();
+        }
+
+        private async UniTask OpenInitialize()
+        {
+            _ctsOnClose = new CancellationTokenSource();
+
+            ItemGenerator.OpenInit(_ctsOnClose.Token);
+            Kushi.OpenInit(_ctsOnClose.Token);
+            CustomerProvider.OpenInit(_ctsOnClose.Token);
         }
     }
 }

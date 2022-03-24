@@ -9,7 +9,7 @@ public class PaymentManager : MonoBehaviour
     [SerializeField] private TMP_Text _fundText;
     private int _fund;
 
-    private void Start()
+    public void FirstInit()
     {
         _fundText.text = "総資産:0¥";
     }

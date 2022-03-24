@@ -35,6 +35,7 @@ public class Customer : MonoBehaviour
 
     public Subject<Unit> OnFinish => _onFinishSubject;
     private Subject<Unit> _onFinishSubject = new Subject<Unit>();
+    
 
     private void Awake()
     {
@@ -59,7 +60,7 @@ public class Customer : MonoBehaviour
     /// <param name="orderCount">注文数</param>
     /// <param name="timeLimit">制限時間</param>
     /// <param name="lengthRange">要求食材の数(範囲)</param>
-    public async void Initialize(int orderCount, float timeLimit, (int min, int max) lengthRange)
+    public async void Initialize(int orderCount, float timeLimit, (int min, int max) lengthRange, CancellationToken ctOnClose)
     {
         _orderCount = orderCount;
         _timeLimit = timeLimit;
@@ -67,6 +68,7 @@ public class Customer : MonoBehaviour
         _timeSlider.maxValue = _timeLimit;
 
         _cts = new CancellationTokenSource();
+        var (cancelUniTask, _) = ctOnClose.ToUniTask();
 
         //Image初期化
         _images
@@ -98,16 +100,24 @@ public class Customer : MonoBehaviour
             .AddTo(this);
 
         //完成するか制限時間になるかを待つ
-        await UniTask.WhenAny(
-            UniTask.WhenAll(
-                UniTask.Create(async () => await Compare(0)),
-                UniTask.Create(async () => await Compare(1)),
-                UniTask.Create(async () => await Compare(2)),
-                UniTask.Create(async () => await Compare(3))
-            ),
-            UniTask.WaitUntil(() => timer >= _timeLimit, cancellationToken: _cts.Token)
-        );
-        Exit();
+        try
+        {
+            await UniTask.WhenAny(
+                UniTask.WhenAll(
+                    UniTask.Create(async () => await Compare(0)),
+                    UniTask.Create(async () => await Compare(1)),
+                    UniTask.Create(async () => await Compare(2)),
+                    UniTask.Create(async () => await Compare(3))
+                ),
+                UniTask.WaitUntil(() => timer >= _timeLimit, cancellationToken: _cts.Token),
+                cancelUniTask
+            );
+        }
+        catch
+        {
+            
+        }
+        Exit(ctOnClose.IsCancellationRequested);
     }
 
     /// <summary>
@@ -162,11 +172,12 @@ public class Customer : MonoBehaviour
     /// <summary>
     /// 客入れ替え時の処理
     /// </summary>
-    private void Exit()
+    private void Exit(bool isCancelled)
     {
         //成功時
-        if (timer < _timeLimit)
+        if (timer < _timeLimit && !isCancelled)
         {
+            Debug.Log("接客成功");
             foreach (var item in _kushi.StockItems)
             {
                 _kushi.isEmpty = true;

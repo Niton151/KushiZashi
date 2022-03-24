@@ -25,7 +25,7 @@ public class ItemGenerator : MonoBehaviour
 
     private List<ItemObjectPool> _itemObjectPools = new List<ItemObjectPool>();
     
-    void Awake()
+    public void FirstInit()
     {
         _ct = this.GetCancellationTokenOnDestroy();
 
@@ -35,23 +35,18 @@ public class ItemGenerator : MonoBehaviour
         }
     }
 
-    async void Start()
+    public void OpenInit(CancellationToken ctOnClose)
     {
         var span = Random.Range(_minSpan, _maxSpan);
-
-        //InGame待ち
-        await GameManager.gameManager.GameState
-            .Where(x => x == GameState.InGame)
-            .ToUniTask(true, _ct);
         
         //ランダムな間隔でアイテム生成
-        await UniTaskAsyncEnumerable
+        UniTaskAsyncEnumerable
             .Interval(TimeSpan.FromSeconds(span))
             .ForEachAsync(_ =>
             {
                 Generate();
                 span = Random.Range(_minSpan, _maxSpan);
-            }, cancellationToken:_ct);
+            }, cancellationToken:ctOnClose);
     }
 
     /// <summary>
