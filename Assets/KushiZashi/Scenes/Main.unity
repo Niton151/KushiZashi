@@ -1553,7 +1553,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 894377661}
   m_Direction: 2
   m_Value: -0.00012207031
-  m_Size: 0.9976461
+  m_Size: 0.99903053
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -5136,10 +5136,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23ec2d771ca75344e9b4a96802f6e49e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _openHour: 22
+  _openHour: 10
   _openMinute: 0
   _closeHour: 23
   _closeMinute: 0
+  _accelerate: 1000
 --- !u!4 &1192716415
 Transform:
   m_ObjectHideFlags: 0
@@ -7717,7 +7718,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 1.000019}
+  m_AnchoredPosition: {x: 0, y: 0.9999817}
   m_SizeDelta: {x: 0, y: 1081}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1682516562

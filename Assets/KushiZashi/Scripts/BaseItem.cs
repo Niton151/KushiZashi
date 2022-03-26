@@ -9,18 +9,9 @@ using UnityEngine.UI;
 
 public class BaseItem : MonoBehaviour
 {
-    [SerializeField] private string _name;
-    [SerializeField] private Vector3 _initialVelocity;
-    [SerializeField] private float _cookTime = 3;
-    [SerializeField] private Material _cookedMat;
-    [SerializeField] private Material _defaultMat;
-    [SerializeField] private Sprite _icon;
-    [SerializeField] private int _price;
-
     private readonly Subject<Unit> _finishedSubject = new Subject<Unit>();
     private Rigidbody _rigidbody;
     private KushiManager _kushi;
-    private UpgradeManager _upgradeManager;
     private IDisposable _cookDisposable;
     private IDisposable _kushiDisposable;
     private Renderer _renderer;
@@ -30,21 +21,15 @@ public class BaseItem : MonoBehaviour
 
     //オブジェクトを使い終わったことを通知する
     public IObservable<Unit> OnFinishedAsync => _finishedSubject;
-    public string Name => _name;
+
     public bool IsCooked
     {
         get => _isCooked;
         set => _isCooked = value;
     }
-
-    public Sprite Icon => _icon;
+    
     public Transform Root => _root;
-
-    public int Price
-    {
-        get => _price;
-        set => _price = value;
-    }
+    public ItemObjectPoolProvider Provider;
 
     private void Start()
     {
@@ -69,7 +54,7 @@ public class BaseItem : MonoBehaviour
             .TakeUntilDisable(this)
             .Subscribe(_ =>
             {
-                _rigidbody.AddForce(_initialVelocity, ForceMode.VelocityChange);
+                _rigidbody.AddForce(Provider.InitialVelocity, ForceMode.VelocityChange);
             });
 
         //串に衝突するイベント
@@ -90,7 +75,7 @@ public class BaseItem : MonoBehaviour
         _renderer = this.GetComponent<Renderer>();
         _cookDisposable = this.OnTriggerEnterAsObservable()
             .Where(x => x.CompareTag("Fire"))
-            .SelectMany(_ => Observable.Interval(TimeSpan.FromSeconds(_cookTime)))
+            .SelectMany(_ => Observable.Interval(TimeSpan.FromSeconds(Provider.CookTime)))
             .TakeUntil(this.OnTriggerExitAsObservable())
             .RepeatUntilDestroy(this.gameObject)
             .Subscribe(_ => OnCook())
@@ -119,8 +104,9 @@ public class BaseItem : MonoBehaviour
                                 |RigidbodyConstraints.FreezePositionZ;
         
         //位置調整
-        transform.position = new Vector3(_kushi.transform.position.x, transform.position.y,
-            _kushi.transform.position.z);
+        var position = _kushi.transform.position;
+        transform.position = new Vector3(position.x, transform.position.y,
+            position.z);
         
         //空のときは串の下の方で止める
         if (_kushi.isEmpty)
@@ -136,7 +122,7 @@ public class BaseItem : MonoBehaviour
     /// </summary>
     private void OnCook()
     {
-        _renderer.material = _cookedMat;
+        _renderer.material = Provider.CookedMat;
         _isCooked = true;
         
         _cookDisposable.Dispose();
@@ -159,7 +145,7 @@ public class BaseItem : MonoBehaviour
         _rigidbody.constraints = RigidbodyConstraints.None;
         
         //マテリアルを初期化
-        _renderer.material = _defaultMat;
+        _renderer.material = Provider.DefaultMat;
         
         //イベント発行
         _finishedSubject.OnNext(Unit.Default);
@@ -181,12 +167,12 @@ public class BaseItem : MonoBehaviour
 
         //Numberで比較する
         BaseItem c = (BaseItem)obj;
-        return (this.Name == c.Name && this._isCooked == c._isCooked);
+        return (this.Provider.Name == c.Provider.Name && this._isCooked == c._isCooked);
     }
 
     //Equalsがtrueを返すときに同じ値を返す
     public override int GetHashCode()
     {
-        return this.Name.GetHashCode() ^ this._isCooked.GetHashCode();
+        return this.Provider.Name.GetHashCode() ^ this._isCooked.GetHashCode();
     }
 }

@@ -94,8 +94,7 @@ public class Customer : MonoBehaviour
             {
                 timer += Time.deltaTime;
                 _timeSlider.value = _timeLimit - timer;
-            })
-            .AddTo(this);
+            });
 
         //完成するか制限時間になるかを待つ
         try
@@ -157,7 +156,7 @@ public class Customer : MonoBehaviour
             for (int j = 0; j < count; j++)
             {
                 var item = _menus[i].MenuList[j];
-                _images[i][count-j - 1].sprite = item.Icon;
+                _images[i][count - j - 1].sprite = item.Provider.Icon;
             }
         }
     }
@@ -174,7 +173,7 @@ public class Customer : MonoBehaviour
             PaymentManager.Fund += _menus.Select(x => x.SumPrice).Sum();
         }
 
-        _images.ForEach(x => x.ForEach(y => y.sprite = _defaultIcon));
+        _images?.ForEach(x => x.ForEach(y => y.sprite = _defaultIcon));
         
         _disposable?.Dispose();
         _cts?.Cancel();

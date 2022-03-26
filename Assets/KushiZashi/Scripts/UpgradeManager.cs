@@ -51,7 +51,6 @@ public class UpgradeManager : MonoBehaviour
         //UI生成
         var element = Instantiate(_template, _parent);
         var uiMediator = element.GetComponent<UpgradeUIMediator>();
-        var item = itemProvider.Item;
 
         uiMediator.upgradeButton
             .OnClickAsObservable()
@@ -60,16 +59,16 @@ public class UpgradeManager : MonoBehaviour
             {
                 itemProvider.GradeUp();
                 uiMediator.upgradeCost.text = itemProvider.UpgradeCost.ToString();
-                uiMediator.price.text = item.Price.ToString();
+                uiMediator.price.text = itemProvider.Price.ToString();
             })
             .AddTo(this);
 
         PaymentManager.Fund -= itemProvider.UnlockCost;
 
         //UI初期化
-        uiMediator.name.text = item.Name;
-        uiMediator.image.sprite = item.Icon;
-        uiMediator.price.text = item.Price.ToString();
+        uiMediator.name.text = itemProvider.Name;
+        uiMediator.image.sprite = itemProvider.Icon;
+        uiMediator.price.text = itemProvider.Price.ToString();
         uiMediator.upgradeCost.text = itemProvider.UpgradeCost.ToString();
 
         //アンロックのテキストを書き換え

@@ -45,4 +45,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _prefab: {fileID: 8986002400466236101, guid: 1bcb7ad9a92f35b4e869a37495ea0792, type: 3}
   _unlockCost: 50
-  _level: 1
+  _initLevel: 1
+  _name: "\u306D\u304E"
+  _initialVelocity: {x: 0, y: 0, z: 0}
+  _cookTime: 3
+  _cookedMat: {fileID: 2100000, guid: 21015589d69ad8540944d657ccaeb44e, type: 2}
+  _defaultMat: {fileID: 2100000, guid: 368b07066d1eb8246b31a27b68727242, type: 2}
+  _icon: {fileID: 21300000, guid: 468eb0fac7c82c04a9c090993258d490, type: 3}
+  _initPrice: 5

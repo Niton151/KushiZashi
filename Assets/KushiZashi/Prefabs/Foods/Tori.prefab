@@ -47,13 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 299266429ba3ecd45a82b20f475bfb59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _name: "\u9CE5"
-  _initialVelocity: {x: 0, y: 0, z: 0}
-  _cookTime: 3
-  _cookedMat: {fileID: 2100000, guid: c8cbc42d7ff499f4194c63cd9b505f2c, type: 2}
-  _defaultMat: {fileID: 2100000, guid: 3cc044079bac4884f9ea0c0e80e5cd05, type: 2}
-  _icon: {fileID: 21300000, guid: 76826777a2165414da343f2e882947af, type: 3}
-  _price: 10
+  Provider: {fileID: 4076301202279967494, guid: 4ec19d31162e50949b6856adcdb5ed6f, type: 3}
 --- !u!33 &549376445721475976
 MeshFilter:
   m_ObjectHideFlags: 0

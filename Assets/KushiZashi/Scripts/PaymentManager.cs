@@ -10,7 +10,7 @@ using UnityEngine;
 public class PaymentManager : MonoBehaviour
 {
     [SerializeField] private TMP_Text _fundText;
-    private static int _fund = 10000;
+    private static int _fund = 150;
 
     public static int Fund
     {

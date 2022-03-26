@@ -16,6 +16,7 @@ public class StoreManager : MonoBehaviour
     [SerializeField] private int _openMinute;
     [SerializeField] private int _closeHour;
     [SerializeField] private int _closeMinute;
+    [SerializeField] private float _accelerate;
 
     private ReactiveProperty<bool> _isOpen = new ReactiveProperty<bool>();
     private CancellationToken _ct;
@@ -44,6 +45,16 @@ public class StoreManager : MonoBehaviour
             {
                 _isOpen.Value = false;
             }, _ct);
-            
+
+        
+        UniTaskAsyncEnumerable
+            .EveryUpdate()
+            .Where(_ => Input.GetKeyDown(KeyCode.S))
+            .Where(_ => !_isOpen.Value)
+            .ForEachAsync(_ =>
+            {
+                _timeManager.Accelerate(_accelerate, new TimeSpan(_openHour, _openMinute - 30, 0));
+            }, _ct);
+
     }
 }

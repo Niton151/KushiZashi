@@ -47,4 +47,16 @@ public class TimeManager : MonoBehaviour
                 _nowDayText.text = (_now.Day - DateTime.MinValue.Day + 1).ToString() + "日目";
             }, _ct);
     }
+
+    public async void Accelerate(float min1sec, TimeSpan until)
+    {
+        var temp = _min1sec;
+        _min1sec = min1sec;
+        
+        await UniTask.WaitUntil(() => _now.TimeOfDay >= until);
+
+        _min1sec = temp;
+
+
+    }
 }

@@ -23,6 +23,15 @@ public class Menu
             _menuList[i].IsCooked = true;
         }
 
-        _sumPrice = _menuList.Sum(x => x.Price);
+        try
+        {
+            _sumPrice = _menuList.Sum(x => x.Provider.Price);
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+            throw;
+        }
+        
     }
 }
