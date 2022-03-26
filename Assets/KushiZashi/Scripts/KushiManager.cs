@@ -49,10 +49,30 @@ public class KushiManager : MonoBehaviour
             {
                 _kushiCamera.SetActive(x);
             }, ctOnClose);
+        
+        //AllClear操作
+        UniTaskAsyncEnumerable
+            .EveryUpdate()
+            .Where(_ => Input.GetKeyDown(KeyCode.C))
+            .ForEachAsync(_ =>
+            {
+                AllClear();
+            }, ctOnClose);
 
         await GameManager.gameManager.GameState
             .Where(x => x != GameState.Open)
             .ToUniTask(true, _ct);
         gameObject.SetActive(false);
+    }
+
+    public void AllClear()
+    {
+        foreach (var item in _stockItems)
+        {
+            isEmpty = true;
+            item.transform.SetParent(item.Root);
+            item.Finish();
+        }
+        _stockItems.Clear();
     }
 }

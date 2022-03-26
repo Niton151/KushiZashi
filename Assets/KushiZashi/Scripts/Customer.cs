@@ -31,7 +31,6 @@ public class Customer : MonoBehaviour
     [SerializeField] private Sprite _defaultIcon;
 
     private KushiManager _kushi;
-    private PaymentManager _paymentManager;
 
     public Subject<Unit> OnFinish => _onFinishSubject;
     private Subject<Unit> _onFinishSubject = new Subject<Unit>();
@@ -40,7 +39,6 @@ public class Customer : MonoBehaviour
     private void Awake()
     {
         _kushi = GameManager.gameManager.Kushi;
-        _paymentManager = GameManager.gameManager.PaymentManager;
 
         //注文内容を表示するためののImageを取得
         var parent = GameObject.Find("OrderBack");
@@ -137,13 +135,7 @@ public class Customer : MonoBehaviour
                     //icon削除
                     _images[i].ForEach(x => x.sprite = _defaultIcon);
                     //串をclear
-                    foreach (var item in _kushi.StockItems)
-                    {
-                        _kushi.isEmpty = true;
-                        item.transform.SetParent(item.Root);
-                        item.Finish();
-                    }
-                    _kushi.StockItems.Clear();
+                    _kushi.AllClear();
                     break;
                 }
             }
@@ -161,10 +153,11 @@ public class Customer : MonoBehaviour
     {
         for (int i = 0; i < _orderCount; i++)
         {
-            for (int j = 0; j < _menus[i].MenuList.Count; j++)
+            var count = _menus[i].MenuList.Count;
+            for (int j = 0; j < count; j++)
             {
                 var item = _menus[i].MenuList[j];
-                _images[i][j].sprite = item.Icon;
+                _images[i][count-j - 1].sprite = item.Icon;
             }
         }
     }
@@ -177,31 +170,25 @@ public class Customer : MonoBehaviour
         //成功時
         if (timer < _timeLimit && !isCancelled)
         {
-            Debug.Log("接客成功");
-            foreach (var item in _kushi.StockItems)
-            {
-                _kushi.isEmpty = true;
-                item.transform.SetParent(item.Root);
-                item.Finish();
-            }
-            _kushi.StockItems.Clear();
-            _paymentManager.AddMoney(_menus.Select(x => x.SumPrice).Sum());
+            _kushi.AllClear();
+            PaymentManager.Fund += _menus.Select(x => x.SumPrice).Sum();
         }
 
         _images.ForEach(x => x.ForEach(y => y.sprite = _defaultIcon));
         
-        _disposable.Dispose();
-        _cts.Cancel();
-        _cts.Dispose();
+        _disposable?.Dispose();
+        _cts?.Cancel();
+        _cts?.Dispose();
         timer = 0;
+        _menus.Clear();
         Debug.Log("exit");
         _onFinishSubject.OnNext(Unit.Default);
     }
 
     private void OnDestroy()
     {
-        _disposable.Dispose();
-        _cts.Cancel();
-        _cts.Dispose();
+        _disposable?.Dispose();
+        _cts?.Cancel();
+        _cts?.Dispose();
     }
 }

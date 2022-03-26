@@ -28,11 +28,6 @@ public class ItemGenerator : MonoBehaviour
     public void FirstInit()
     {
         _ct = this.GetCancellationTokenOnDestroy();
-
-        for (int i = 0; i < _itemObjectPoolProviders.Count; i++)
-        {
-            _itemObjectPools.Add(_itemObjectPoolProviders[i].Get());
-        }
     }
 
     public void OpenInit(CancellationToken ctOnClose)
@@ -66,6 +61,7 @@ public class ItemGenerator : MonoBehaviour
         var randomIndex = Random.Range(0, _itemObjectPoolProviders.Count);
         var item = _itemObjectPools[randomIndex].Rent();
         
+        Debug.Log(randomIndex);
         item.Initialize(initPos, initRot);
 
         item.OnFinishedAsync
@@ -75,6 +71,12 @@ public class ItemGenerator : MonoBehaviour
                 _itemObjectPools[randomIndex].Return(item);
             })
             .AddTo(this);
+    }
+
+    public void AddProvider(ItemObjectPoolProvider provider)
+    {
+        _itemObjectPoolProviders.Add(provider);
+        _itemObjectPools.Add(provider.Get());
     }
 
     private void OnDrawGizmosSelected()

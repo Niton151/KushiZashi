@@ -16,7 +16,7 @@ public class TimeManager : MonoBehaviour
     [SerializeField] private TMP_Text _nowDayText;
     [SerializeField] private Light _sun;
     
-    private DateTime _now = new DateTime(1, 1, 1, 9, 0, 0);
+    private DateTime _now = new DateTime(1, 1, 1, 0, 0, 0);
     private CancellationToken _ct;
 
     private float _degree1sec;

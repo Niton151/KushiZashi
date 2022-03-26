@@ -24,7 +24,7 @@ public class CustomerProvider : MonoBehaviour
 
     public void OpenInit(CancellationToken ctOnClose)
     {
-        _customer.Initialize(1, 10, lengthRange:(3, 5), ctOnClose);
+        _customer.Initialize(1, 30, lengthRange:(3, 5), ctOnClose);
 
         //客の入れ替え処理
         _customer.OnFinish

@@ -25,12 +25,14 @@ namespace Manager
     {
         public static GameManager gameManager => Instance;
         public ReactiveProperty<GameState> GameState = new ReactiveProperty<GameState>(Manager.GameState.Title);
+        public ItemManager ItemManager { get; private set; }
         public ItemGenerator ItemGenerator { get; private set; }
         public KushiManager Kushi { get; private set; }
         public PaymentManager PaymentManager { get; private set; }
         public TimeManager TimeManager { get; private set; }
         public StoreManager StoreManager { get; private set; }
         public CustomerProvider CustomerProvider { get; private set; }
+        public UpgradeManager UpgradeManager { get; private set; }
 
         private CancellationTokenSource _ctsOnClose;
 
@@ -65,12 +67,15 @@ namespace Manager
                     case Manager.GameState.Open:
                         Debug.Log("Open");
                         await OpenInitialize();
+                        UpgradeManager.UpgradeUI.SetActive(false);
+                        
                         await StoreManager.IsOpen.Where(x => !x).ToUniTask(true, _ct);
                         GameState.Value = Manager.GameState.Close;
                         break;
                     case Manager.GameState.Close:
                         Debug.Log("Close");
                         _ctsOnClose.Cancel();
+                        UpgradeManager.UpgradeUI.SetActive(true);
                         await StoreManager.IsOpen.Where(x => x).ToUniTask(true, _ct);
                         GameState.Value = Manager.GameState.Open;
                         break;
@@ -94,6 +99,8 @@ namespace Manager
         private async UniTask MainInitialize()
         {
             //ここに初期化処理を書く
+            ItemManager = GameObject.Find(Const.ItemManager).GetComponent<ItemManager>();
+            
             ItemGenerator = GameObject.Find(Const.ItemGenerator).GetComponent<ItemGenerator>();
             ItemGenerator.FirstInit();
 
@@ -111,6 +118,9 @@ namespace Manager
 
             CustomerProvider = GameObject.Find(Const.CustomerProvider).GetComponent<CustomerProvider>();
             CustomerProvider.FirstInit();
+
+            UpgradeManager = GameObject.Find(Const.UpgradeManager).GetComponent<UpgradeManager>();
+            UpgradeManager.FirstInit();
         }
 
         private async UniTask OpenInitialize()

@@ -11,26 +11,25 @@ public class BaseItem : MonoBehaviour
 {
     [SerializeField] private string _name;
     [SerializeField] private Vector3 _initialVelocity;
-    [SerializeField] private int _price;
-    [SerializeField] private float _cookTime;
+    [SerializeField] private float _cookTime = 3;
     [SerializeField] private Material _cookedMat;
     [SerializeField] private Material _defaultMat;
     [SerializeField] private Sprite _icon;
+    [SerializeField] private int _price;
 
     private readonly Subject<Unit> _finishedSubject = new Subject<Unit>();
     private Rigidbody _rigidbody;
     private KushiManager _kushi;
+    private UpgradeManager _upgradeManager;
     private IDisposable _cookDisposable;
     private IDisposable _kushiDisposable;
     private Renderer _renderer;
     private bool _isCooked = false;
     private Transform _root;
     private CancellationToken _ct;
-    
+
     //オブジェクトを使い終わったことを通知する
     public IObservable<Unit> OnFinishedAsync => _finishedSubject;
-
-    public int Price => _price;
     public string Name => _name;
     public bool IsCooked
     {
@@ -40,6 +39,12 @@ public class BaseItem : MonoBehaviour
 
     public Sprite Icon => _icon;
     public Transform Root => _root;
+
+    public int Price
+    {
+        get => _price;
+        set => _price = value;
+    }
 
     private void Start()
     {
