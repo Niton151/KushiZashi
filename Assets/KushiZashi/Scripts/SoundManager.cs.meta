@@ -1,0 +1,23 @@
+fileFormatVersion: 2
+guid: 880f6a2a77d87d2449b63497dd18e62e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - bgm: {fileID: 8300000, guid: d52277e015eb8684b839531f560baa6f, type: 3}
+  - clock: {fileID: 8300000, guid: 7706acd41f839f4498e0c15e643b0c1a, type: 3}
+  - gusa: {fileID: 8300000, guid: 0a099a0fbced0ad4baf0130dd45e7184, type: 3}
+  - ju: {fileID: 8300000, guid: 5c55f02526b46a94781b24a4384231ad, type: 3}
+  - match: {fileID: 8300000, guid: 2ab700e69e8b0a841b014c7965232cd5, type: 3}
+  - wrong: {fileID: 8300000, guid: eb5b64834e10587498f57be5900051db, type: 3}
+  - money: {fileID: 8300000, guid: 478cf995aaab24d42bb5bef7e3139c41, type: 3}
+  - timeup: {fileID: 8300000, guid: 479c2ce13bef53545b3d2f7cb1ab8a21, type: 3}
+  - delete: {fileID: 8300000, guid: 8122d25937044074d92f4ac09e6a3c13, type: 3}
+  - select: {fileID: 8300000, guid: 0a233a5720ee8384ba1879211c55fd33, type: 3}
+  - upgrade: {fileID: 8300000, guid: 33a6e154cd7cbf946856c385d7da1444, type: 3}
+  - unlock: {fileID: 8300000, guid: 234de59599aed1848b63b56bfab35f8f, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
