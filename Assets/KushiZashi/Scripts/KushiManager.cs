@@ -24,11 +24,13 @@ public class KushiManager : MonoBehaviour
     private Collider _collider;
     private CancellationToken _ct;
     private GameObject _kushiCamera;
+    private SoundManager _se;
 
     public void FirstInit()
     {
         _collider = this.GetComponent<CapsuleCollider>();
         _kushiCamera = transform.GetComponentInChildren<Camera>().gameObject;
+        _se = SoundManager.Instance;
         _ct = this.GetCancellationTokenOnDestroy();   
         
         //串が満タンのときコライダーを無効化
@@ -44,7 +46,7 @@ public class KushiManager : MonoBehaviour
         gameObject.SetActive(true);
         //串ビューモード
         UniTaskAsyncEnumerable
-            .EveryValueChanged(this, _ => Input.GetKey(KeyCode.E))
+            .EveryValueChanged(this, _ => Input.GetKey(KeyCode.LeftShift))
             .ForEachAsync(x =>
             {
                 _kushiCamera.SetActive(x);
@@ -56,6 +58,7 @@ public class KushiManager : MonoBehaviour
             .Where(_ => Input.GetKeyDown(KeyCode.C))
             .ForEachAsync(_ =>
             {
+                _se.Audio.PlayOneShot(_se.delete);
                 AllClear();
             }, ctOnClose);
 

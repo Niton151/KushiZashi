@@ -61,7 +61,6 @@ public class ItemGenerator : MonoBehaviour
         var randomIndex = Random.Range(0, _itemObjectPoolProviders.Count);
         var item = _itemObjectPools[randomIndex].Rent();
         
-        Debug.Log(randomIndex);
         item.Initialize(initPos, initRot);
 
         item.OnFinishedAsync

@@ -13,6 +13,7 @@ public static class Const
     public const string StoreManager = "StoreManager";
     public const string CustomerProvider = "CustomerProvider";
     public const string UpgradeManager = "UpgradeManager";
+    public const string SoundManager = "SoundManager";
     public const string MainScene = "Main";
     public const string TitleScene = "Title";
     public const string ResultScene = "Result";

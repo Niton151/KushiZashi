@@ -57,7 +57,7 @@ public class ItemObjectPoolProvider : MonoBehaviour
     public void GradeUp()
     {
         _level++;
-        PaymentManager.Fund -= _upgradeCost;
+        PaymentManager.Instance.Fund -= _upgradeCost;
         _price = (int)Mathf.Ceil(_price * 1.05f);
         _upgradeCost = (int) Mathf.Ceil(_upgradeCost * 1.05f);
     }

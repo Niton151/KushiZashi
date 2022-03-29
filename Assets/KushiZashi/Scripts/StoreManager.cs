@@ -8,7 +8,7 @@ using Manager;
 using UniRx;
 using UnityEngine;
 
-public class StoreManager : MonoBehaviour
+public class StoreManager : SingletonMonoBehaviour<StoreManager>
 {
     public IReadOnlyReactiveProperty<bool> IsOpen => _isOpen;
     
@@ -20,29 +20,31 @@ public class StoreManager : MonoBehaviour
 
     private ReactiveProperty<bool> _isOpen = new ReactiveProperty<bool>();
     private CancellationToken _ct;
-
-    private TimeManager _timeManager;
+    
+    private SoundManager _se;
 
     public void FirstInit()
     {
         _ct = this.GetCancellationTokenOnDestroy();
-        _timeManager = GameManager.gameManager.TimeManager;
+        _se = SoundManager.Instance;
 
         //開店
         UniTaskAsyncEnumerable
-            .EveryValueChanged(this, _ => _timeManager.NowTime)
-            .Where(x => x.Hour == _openHour && x.Minute == _openMinute)
+            .EveryValueChanged(this, _ => TimeManager.Instance.NowTime)
+            .Where(x => x.Hour == _openHour && x.Minute == _openMinute && _isOpen.Value == false)
             .ForEachAsync(_ =>
             {
+                _se.Audio.PlayOneShot(_se.clock);
                 _isOpen.Value = true;
             }, _ct);
         
         //閉店
         UniTaskAsyncEnumerable
-            .EveryValueChanged(_timeManager, _ => _timeManager.NowTime)
-            .Where(x => x.Hour == _closeHour && x.Minute == _closeMinute)
+            .EveryValueChanged(TimeManager.Instance, _ => TimeManager.Instance.NowTime)
+            .Where(x => x.Hour == _closeHour && x.Minute == _closeMinute && _isOpen.Value == true)
             .ForEachAsync(_ =>
             {
+                _se.Audio.PlayOneShot(_se.clock);
                 _isOpen.Value = false;
             }, _ct);
 
@@ -53,7 +55,7 @@ public class StoreManager : MonoBehaviour
             .Where(_ => !_isOpen.Value)
             .ForEachAsync(_ =>
             {
-                _timeManager.Accelerate(_accelerate, new TimeSpan(_openHour, _openMinute - 30, 0));
+                TimeManager.Instance.Accelerate(_accelerate, new TimeSpan(_openHour, _openMinute - 30, 0));
             }, _ct);
 
     }

@@ -9,7 +9,7 @@ using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UpgradeManager : MonoBehaviour
+public class UpgradeManager : SingletonMonoBehaviour<UpgradeManager>
 {
     [SerializeField] private GameObject _template;
     [SerializeField] private Transform _parent;
@@ -20,6 +20,7 @@ public class UpgradeManager : MonoBehaviour
     private List<Button> _upgradeButtons = new List<Button>();
     private ItemGenerator _itemGenerator;
     private ItemManager _itemManager;
+    private SoundManager _se;
     private int _nextIndex = 0;
 
     public GameObject UpgradeUI => _upgradeUI;
@@ -27,7 +28,9 @@ public class UpgradeManager : MonoBehaviour
     public void FirstInit()
     {
         _itemGenerator = GameManager.gameManager.ItemGenerator;
-        _itemManager = GameManager.gameManager.ItemManager;
+        _itemManager = ItemManager.Instance;
+        _se = SoundManager.Instance;
+        //_upgradeUI.SetActive(false);
 
         Unlock(_itemManager.Items[_nextIndex]);
 
@@ -35,7 +38,7 @@ public class UpgradeManager : MonoBehaviour
         _newItemButton
             .OnClickAsObservable()
             .Select(_ => _itemManager.Items[_nextIndex])
-            .Where(x => x.UnlockCost <= PaymentManager.Fund)
+            .Where(x => x.UnlockCost <= PaymentManager.Instance.Fund)
             .Subscribe(Unlock)
             .AddTo(this);
     }
@@ -47,6 +50,7 @@ public class UpgradeManager : MonoBehaviour
     private void Unlock(ItemObjectPoolProvider itemProvider)
     {
         _itemGenerator.AddProvider(itemProvider);
+        _se.Audio.PlayOneShot(_se.unlock);
 
         //UI生成
         var element = Instantiate(_template, _parent);
@@ -54,16 +58,18 @@ public class UpgradeManager : MonoBehaviour
 
         uiMediator.upgradeButton
             .OnClickAsObservable()
-            .Where(_ => itemProvider.UpgradeCost <= PaymentManager.Fund)
+            .Where(_ => itemProvider.UpgradeCost <= PaymentManager.Instance.Fund)
             .Subscribe(_ =>
             {
                 itemProvider.GradeUp();
                 uiMediator.upgradeCost.text = itemProvider.UpgradeCost.ToString();
                 uiMediator.price.text = itemProvider.Price.ToString();
+                
+                _se.Audio.PlayOneShot(_se.upgrade);
             })
             .AddTo(this);
 
-        PaymentManager.Fund -= itemProvider.UnlockCost;
+        PaymentManager.Instance.Fund -= itemProvider.UnlockCost;
 
         //UI初期化
         uiMediator.name.text = itemProvider.Name;

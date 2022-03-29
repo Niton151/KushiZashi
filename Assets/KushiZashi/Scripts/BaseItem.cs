@@ -18,6 +18,7 @@ public class BaseItem : MonoBehaviour
     private bool _isCooked = false;
     private Transform _root;
     private CancellationToken _ct;
+    private SoundManager _se;
 
     //オブジェクトを使い終わったことを通知する
     public IObservable<Unit> OnFinishedAsync => _finishedSubject;
@@ -34,6 +35,7 @@ public class BaseItem : MonoBehaviour
     private void Start()
     {
         _kushi = GameManager.gameManager.Kushi;
+        _se = SoundManager.Instance;
         _root = transform.parent;
         _ct = this.GetCancellationTokenOnDestroy();
     }
@@ -93,6 +95,9 @@ public class BaseItem : MonoBehaviour
     /// </summary>
     private async void OnHit()
     {
+        //エフェクト
+        _se.Audio.PlayOneShot(_se.gusa);
+        
         _kushiDisposable.Dispose();
         //いろいろなところに追加
         this.transform.SetParent(_kushi.transform);
@@ -122,6 +127,7 @@ public class BaseItem : MonoBehaviour
     /// </summary>
     private void OnCook()
     {
+        _se.Audio.PlayOneShot(_se.ju);
         _renderer.material = Provider.CookedMat;
         _isCooked = true;
         

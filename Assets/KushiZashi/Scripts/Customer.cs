@@ -31,14 +31,19 @@ public class Customer : MonoBehaviour
     [SerializeField] private Sprite _defaultIcon;
 
     private KushiManager _kushi;
+    private SoundManager _se;
 
     public Subject<Unit> OnFinish => _onFinishSubject;
     private Subject<Unit> _onFinishSubject = new Subject<Unit>();
+    
+    //チュートリアル用
+    public int FirstMenuCount => _menus[0].MenuList.Count;
     
 
     private void Awake()
     {
         _kushi = GameManager.gameManager.Kushi;
+        _se = SoundManager.Instance;
 
         //注文内容を表示するためののImageを取得
         var parent = GameObject.Find("OrderBack");
@@ -135,8 +140,10 @@ public class Customer : MonoBehaviour
                     _images[i].ForEach(x => x.sprite = _defaultIcon);
                     //串をclear
                     _kushi.AllClear();
+                    _se.Audio.PlayOneShot(_se.match);
                     break;
                 }
+                _se.Audio.PlayOneShot(_se.wrong);
             }
             else
             {
@@ -170,7 +177,12 @@ public class Customer : MonoBehaviour
         if (timer < _timeLimit && !isCancelled)
         {
             _kushi.AllClear();
-            PaymentManager.Fund += _menus.Select(x => x.SumPrice).Sum();
+            PaymentManager.Instance.Fund += _menus.Select(x => x.SumPrice).Sum();
+            _se.Audio.PlayOneShot(_se.money);
+        }
+        else if(timer >= _timeLimit)
+        {
+            _se.Audio.PlayOneShot(_se.timeup);
         }
 
         _images?.ForEach(x => x.ForEach(y => y.sprite = _defaultIcon));

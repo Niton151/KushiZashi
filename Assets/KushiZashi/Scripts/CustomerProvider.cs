@@ -9,12 +9,14 @@ using UniRx;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class CustomerProvider : MonoBehaviour
+public class CustomerProvider : SingletonMonoBehaviour<CustomerProvider>
 {
     [SerializeField] private Customer _prefab;
 
     private Customer _customer;
     private CancellationToken _ct;
+
+    public Customer Customer => _customer;
     
     public void FirstInit()
     {
@@ -24,7 +26,7 @@ public class CustomerProvider : MonoBehaviour
 
     public void OpenInit(CancellationToken ctOnClose)
     {
-        _customer.Initialize(1, 30, lengthRange:(3, 5), ctOnClose);
+        _customer.Initialize(1, 10000, lengthRange:(3, 3), ctOnClose);
 
         //客の入れ替え処理
         _customer.OnFinish
@@ -33,7 +35,7 @@ public class CustomerProvider : MonoBehaviour
             {
                 Debug.Log("Customer init");
                 var count = Random.Range(1, 4);
-                var min = Random.Range(1, 3);
+                var min = Random.Range(2, 3);
                 var max = Random.Range(min, 8);
                 var time = (int)(30 + (count - 1) * (max + min) * 0.5 * 5);
                 _customer.Initialize(count, time, (min, max), ctOnClose);

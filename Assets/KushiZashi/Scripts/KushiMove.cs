@@ -30,7 +30,7 @@ public class KushiMove : MonoBehaviour
             {
                 v.z = 11f;  //z座標は適当にセット
                 var position = _camera.ScreenToWorldPoint(v);
-                gameObject.transform.position = position;
+                gameObject.transform.position = new Vector3(Mathf.Clamp(position.x, -7.0f, 100f), position.y, position.z);
             })
             .AddTo(this);
     }

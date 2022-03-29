@@ -7,12 +7,13 @@ using Cysharp.Threading.Tasks.Linq;
 using TMPro;
 using UnityEngine;
 
-public class PaymentManager : MonoBehaviour
+public class PaymentManager : SingletonMonoBehaviour<PaymentManager>
 {
     [SerializeField] private TMP_Text _fundText;
-    private static int _fund = 150;
+    [SerializeField] private TMP_Text _upgradeFundText;
+    private int _fund = 50;
 
-    public static int Fund
+    public int Fund
     {
         get => _fund;
         set => _fund = value;
@@ -24,9 +25,14 @@ public class PaymentManager : MonoBehaviour
     {
         _ct = this.GetCancellationTokenOnDestroy();
         _fundText.text = "総資産:0¥";
+        _upgradeFundText.text = "総資産:0¥";
 
         UniTaskAsyncEnumerable
             .EveryValueChanged(this, _ => _fund)
-            .ForEachAsync(_ => _fundText.text = $"総資産:{_fund}¥", _ct);
+            .ForEachAsync(_ =>
+            {
+                _fundText.text = $"総資産:{_fund}¥";
+                _upgradeFundText.text = $"総資産:{_fund}¥";
+            }, _ct);
     }
 }
