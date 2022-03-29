@@ -15,6 +15,7 @@ public class CustomerProvider : SingletonMonoBehaviour<CustomerProvider>
 
     private Customer _customer;
     private CancellationToken _ct;
+    private bool _isTutorialCompleted;
 
     public Customer Customer => _customer;
     
@@ -26,7 +27,15 @@ public class CustomerProvider : SingletonMonoBehaviour<CustomerProvider>
 
     public void OpenInit(CancellationToken ctOnClose)
     {
-        _customer.Initialize(1, 10000, lengthRange:(3, 3), ctOnClose);
+        if (_isTutorialCompleted == false)
+        {
+            _customer.Initialize(1, 50000, lengthRange: (3, 3), ctOnClose);
+            _isTutorialCompleted = true;
+        }
+        else
+        {
+            _customer.Initialize(2, 30, lengthRange: (3, 3), ctOnClose);
+        }
 
         //客の入れ替え処理
         _customer.OnFinish

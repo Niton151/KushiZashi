@@ -37,8 +37,18 @@ public class Customer : MonoBehaviour
     private Subject<Unit> _onFinishSubject = new Subject<Unit>();
     
     //チュートリアル用
-    public int FirstMenuCount => _menus[0].MenuList.Count;
-    
+    public int FirstMenuCount
+    {
+        get
+        {
+            if (_menus.Count != 0)
+            {
+                return _menus[0].MenuList.Count;   
+            }
+            return 0;
+        }
+    }
+
 
     private void Awake()
     {
