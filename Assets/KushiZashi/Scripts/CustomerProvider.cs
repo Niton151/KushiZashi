@@ -34,7 +34,7 @@ public class CustomerProvider : SingletonMonoBehaviour<CustomerProvider>
         }
         else
         {
-            _customer.Initialize(2, 30, lengthRange: (3, 3), ctOnClose);
+            _customer.Initialize(1, 30, lengthRange: (3, 3), ctOnClose);
         }
 
         //客の入れ替え処理
@@ -44,9 +44,9 @@ public class CustomerProvider : SingletonMonoBehaviour<CustomerProvider>
             {
                 Debug.Log("Customer init");
                 var count = Random.Range(1, 4);
-                var min = Random.Range(2, 3);
+                var min = 3;
                 var max = Random.Range(min, 8);
-                var time = (int)(30 + (count - 1) * (max + min) * 0.5 * 5);
+                var time = (int)(count * (max + min) * 0.5 * 5);
                 _customer.Initialize(count, time, (min, max), ctOnClose);
             }, ctOnClose);
     }

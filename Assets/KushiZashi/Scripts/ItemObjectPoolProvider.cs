@@ -21,11 +21,13 @@ public class ItemObjectPoolProvider : MonoBehaviour
     [SerializeField] private Material _defaultMat;
     [SerializeField] private Sprite _icon;
     [SerializeField] private int _initPrice;
+    [SerializeField] private string _description;
 
     private ItemObjectPool _objectPool;
     private int _upgradeCost;
     private int _price;
     private int _level;
+    private int _plus;
 
     public int UpgradeCost => _upgradeCost;
     public int UnlockCost => _unlockCost;
@@ -36,6 +38,9 @@ public class ItemObjectPoolProvider : MonoBehaviour
     public float CookTime => _cookTime;
     public Material CookedMat => _cookedMat;
     public Material DefaultMat => _defaultMat;
+    public string Description => _description;
+    public int Level => _level;
+    public int Plus => _plus;
 
 
     public ItemObjectPool Get()
@@ -48,8 +53,9 @@ public class ItemObjectPoolProvider : MonoBehaviour
 
         //アップグレード系の値を初期化
         _price = _initPrice;
+        _plus = (int)Mathf.Ceil(_price * (_initPrice * 0.01f));
         _level = _initLevel;
-        _upgradeCost = (int) (_unlockCost * 1.1f);
+        _upgradeCost = (int) Mathf.Ceil(_unlockCost * (_initPrice * 0.01f + 1f));
 
         return _objectPool;
     }
@@ -58,8 +64,13 @@ public class ItemObjectPoolProvider : MonoBehaviour
     {
         _level++;
         PaymentManager.Instance.Fund -= _upgradeCost;
-        _price = (int)Mathf.Ceil(_price * 1.05f);
-        _upgradeCost = (int) Mathf.Ceil(_upgradeCost * 1.05f);
+        _plus = (int)Mathf.Ceil(_price * (_unlockCost * 0.002f) + _level * 0.08f);
+        if (_level % 10 == 0)
+        {
+            _price = (int)(_price * 1.2f);
+        }
+        _price += _plus;
+        _upgradeCost = (int) Mathf.Ceil(_upgradeCost * ((_unlockCost + _level) * 0.002f + 1f));
     }
 
     private void OnDestroy()

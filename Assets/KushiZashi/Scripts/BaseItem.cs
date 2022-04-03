@@ -14,6 +14,8 @@ public class BaseItem : MonoBehaviour
     private KushiManager _kushi;
     private IDisposable _cookDisposable;
     private IDisposable _kushiDisposable;
+    private IDisposable _zurashi;
+    private IDisposable _ochi;
     private Renderer _renderer;
     private bool _isCooked = false;
     private Transform _root;
@@ -47,6 +49,7 @@ public class BaseItem : MonoBehaviour
     /// <param name="initRotation"></param>
     public void Initialize(Vector3 initPosition, Vector3 initRotation)
     {
+
         transform.position = initPosition;
         transform.Rotate(initRotation);
 
@@ -67,10 +70,10 @@ public class BaseItem : MonoBehaviour
             .AddTo(this);
         
         //串をずらすイベント
-        this.OnTriggerStayAsObservable()
+        _zurashi = this.OnTriggerStayAsObservable()
             .Where(x => x.gameObject.CompareTag("Kushi"))
             .Where(_ => !_kushi.isEmpty)
-            .Subscribe(_ => _kushi.StockItems[0].transform.position += Vector3.down * Time.deltaTime)
+            .Subscribe(_ => _kushi.StockItems[0].transform.position += Vector3.down * Time.deltaTime * 0.5f)
             .AddTo(this);
 
         //焼くイベント
@@ -78,13 +81,13 @@ public class BaseItem : MonoBehaviour
         _cookDisposable = this.OnTriggerEnterAsObservable()
             .Where(x => x.CompareTag("Fire"))
             .SelectMany(_ => Observable.Interval(TimeSpan.FromSeconds(Provider.CookTime)))
-            .TakeUntil(this.OnTriggerExitAsObservable())
+            .TakeUntil(this.OnTriggerExitAsObservable().Where(x => x.CompareTag("Fire")))
             .RepeatUntilDestroy(this.gameObject)
             .Subscribe(_ => OnCook())
             .AddTo(this);
 
         //刺さらずに下に落ちたやつのイベント
-        this.UpdateAsObservable()
+        _ochi = this.UpdateAsObservable()
             .Where(_ => transform.position.y < -20f)
             .Subscribe(_ => Finish())
             .AddTo(this);
@@ -95,6 +98,9 @@ public class BaseItem : MonoBehaviour
     /// </summary>
     private async void OnHit()
     {
+        //表示用にレイヤー変更
+        gameObject.layer = 7;
+        
         //エフェクト
         _se.Audio.PlayOneShot(_se.gusa);
         
@@ -140,10 +146,15 @@ public class BaseItem : MonoBehaviour
     /// </summary>
     public void Finish()
     {
+        _isCooked = false;
+        gameObject.layer = 0;
+        
         //Observable, UniTask破棄
         _kushiDisposable.Dispose();
         _cookDisposable.Dispose();
-        
+        _zurashi.Dispose();
+        _ochi.Dispose();
+
         //速度を初期化
         _rigidbody.velocity = Vector3.zero;
         

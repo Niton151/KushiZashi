@@ -20,6 +20,7 @@ public class StoreManager : SingletonMonoBehaviour<StoreManager>
 
     private ReactiveProperty<bool> _isOpen = new ReactiveProperty<bool>();
     private CancellationToken _ct;
+    private DateTime _closeDateTime;
     
     private SoundManager _se;
 
@@ -46,6 +47,7 @@ public class StoreManager : SingletonMonoBehaviour<StoreManager>
             {
                 _se.Audio.PlayOneShot(_se.clock);
                 _isOpen.Value = false;
+                _closeDateTime = TimeManager.Instance.NowTime;
             }, _ct);
 
         
@@ -55,7 +57,9 @@ public class StoreManager : SingletonMonoBehaviour<StoreManager>
             .Where(_ => !_isOpen.Value)
             .ForEachAsync(_ =>
             {
-                TimeManager.Instance.Accelerate(_accelerate, new TimeSpan(_openHour, _openMinute - 30, 0));
+                var until = new DateTime(_closeDateTime.Year, _closeDateTime.Month, _closeDateTime.Day, _openHour,
+                    _openMinute, 0) + TimeSpan.FromDays(1) - TimeSpan.FromMinutes(10);
+                TimeManager.Instance.Accelerate(_accelerate, until);
             }, _ct);
 
     }

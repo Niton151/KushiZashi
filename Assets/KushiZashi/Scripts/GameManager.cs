@@ -7,7 +7,6 @@ using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Progress = UnityEditor.Progress;
 
 namespace Manager
 {
@@ -37,7 +36,6 @@ namespace Manager
         private void Awake()
         {
             _ct = this.GetCancellationTokenOnDestroy();
-            DontDestroyOnLoad(this.gameObject);
         }
 
         async void Start()
@@ -100,7 +98,7 @@ namespace Manager
             //ここに初期化処理を書く
             SoundManager.Instance.FirstInit();
 
-            ItemGenerator = GameObject.Find(Const.ItemGenerator).GetComponent<ItemGenerator>();
+            ItemGenerator = ItemGenerator.Instance;
             ItemGenerator.FirstInit();
 
             Kushi = GameObject.Find(Const.Kushi).GetComponent<KushiManager>();

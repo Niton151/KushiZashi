@@ -33,7 +33,7 @@ public class Customer : MonoBehaviour
     private KushiManager _kushi;
     private SoundManager _se;
 
-    public Subject<Unit> OnFinish => _onFinishSubject;
+    public IObservable<Unit> OnFinish => _onFinishSubject;
     private Subject<Unit> _onFinishSubject = new Subject<Unit>();
     
     //チュートリアル用

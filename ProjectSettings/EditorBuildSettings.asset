@@ -11,7 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/KushiZashi/Scenes/Main.unity
     guid: 0097df20fa9b32545a65ba0810811bf9
-  - enabled: 1
+  - enabled: 0
     path: Assets/KushiZashi/Scenes/Result.unity
     guid: a580c14ec331b114aaa104eea1386c58
   m_configObjects: {}

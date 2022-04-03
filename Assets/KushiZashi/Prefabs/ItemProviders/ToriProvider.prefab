@@ -48,8 +48,9 @@ MonoBehaviour:
   _initLevel: 1
   _name: "\u9CE5"
   _initialVelocity: {x: 0, y: 0, z: 0}
-  _cookTime: 3
+  _cookTime: 2
   _cookedMat: {fileID: 2100000, guid: c8cbc42d7ff499f4194c63cd9b505f2c, type: 2}
   _defaultMat: {fileID: 2100000, guid: 3cc044079bac4884f9ea0c0e80e5cd05, type: 2}
   _icon: {fileID: 21300000, guid: 76826777a2165414da343f2e882947af, type: 3}
-  _initPrice: 10
+  _initPrice: 15
+  _description: "\u305F\u3060\u306E\u9D8F\u8089"

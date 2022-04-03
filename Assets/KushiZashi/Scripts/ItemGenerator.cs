@@ -9,7 +9,7 @@ using Manager;
 using UniRx;
 using Random = UnityEngine.Random;
 
-public class ItemGenerator : MonoBehaviour
+public class ItemGenerator : SingletonMonoBehaviour<ItemGenerator>
 {
     public List<ItemObjectPoolProvider> ItemObjectPoolProviders => _itemObjectPoolProviders;
     
@@ -32,7 +32,8 @@ public class ItemGenerator : MonoBehaviour
 
     public void OpenInit(CancellationToken ctOnClose)
     {
-        var span = Random.Range(_minSpan, _maxSpan);
+        //var span = Random.Range(_minSpan, _maxSpan);
+        var span = 1 / Math.Sqrt(_itemObjectPoolProviders.Count);
         
         //ランダムな間隔でアイテム生成
         UniTaskAsyncEnumerable
@@ -40,7 +41,7 @@ public class ItemGenerator : MonoBehaviour
             .ForEachAsync(_ =>
             {
                 Generate();
-                span = Random.Range(_minSpan, _maxSpan);
+                //span = Random.Range(_minSpan, _maxSpan);
             }, cancellationToken:ctOnClose);
     }
 

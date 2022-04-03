@@ -17,7 +17,7 @@ public class SoundManager : SingletonMonoBehaviour<SoundManager>
     public AudioClip unlock;
     public AudioClip timeQuick;
 
-    public AudioSource Audio { get; set; }
+    public AudioSource Audio { get; private set; }
 
     public void FirstInit()
     {

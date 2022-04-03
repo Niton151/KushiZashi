@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 [Serializable]
 public class Menu
 {
-    public List<BaseItem> MenuList => _menuList;
+    public IList<BaseItem> MenuList => _menuList;
     public int SumPrice => _sumPrice;
 
     [SerializeField]private List<BaseItem> _menuList = new List<BaseItem>();

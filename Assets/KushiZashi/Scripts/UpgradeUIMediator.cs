@@ -11,4 +11,7 @@ public class UpgradeUIMediator : MonoBehaviour
     [SerializeField] public TMP_Text price;
     [SerializeField] public TMP_Text upgradeCost;
     [SerializeField] public Button upgradeButton;
+    [SerializeField] public TMP_Text description;
+    [SerializeField] public TMP_Text level;
+    [SerializeField] public TMP_Text plus;
 }

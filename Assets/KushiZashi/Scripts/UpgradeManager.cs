@@ -62,8 +62,10 @@ public class UpgradeManager : SingletonMonoBehaviour<UpgradeManager>
             .Subscribe(_ =>
             {
                 itemProvider.GradeUp();
-                uiMediator.upgradeCost.text = itemProvider.UpgradeCost.ToString();
-                uiMediator.price.text = itemProvider.Price.ToString();
+                uiMediator.price.text = itemProvider.Price + "円";
+                uiMediator.upgradeCost.text = itemProvider.UpgradeCost + "円";
+                uiMediator.level.text = itemProvider.Level.ToString();
+                uiMediator.plus.text = itemProvider.Plus + "円"; 
                 
                 _se.Audio.PlayOneShot(_se.upgrade);
             })
@@ -74,8 +76,11 @@ public class UpgradeManager : SingletonMonoBehaviour<UpgradeManager>
         //UI初期化
         uiMediator.name.text = itemProvider.Name;
         uiMediator.image.sprite = itemProvider.Icon;
-        uiMediator.price.text = itemProvider.Price.ToString();
-        uiMediator.upgradeCost.text = itemProvider.UpgradeCost.ToString();
+        uiMediator.price.text = itemProvider.Price + "円";
+        uiMediator.upgradeCost.text = itemProvider.UpgradeCost + "円";
+        uiMediator.description.text = itemProvider.Description;
+        uiMediator.level.text = itemProvider.Level.ToString();
+        uiMediator.plus.text = itemProvider.Plus + "円"; 
 
         //アンロックのテキストを書き換え
         try

@@ -1,3 +1,4 @@
+using Manager;
 using UnityEngine;
  
 public class SingletonMonoBehaviour<T> : MonoBehaviour
@@ -12,6 +13,7 @@ public class SingletonMonoBehaviour<T> : MonoBehaviour
             if (instance == null)
             {
                 instance = (T)FindObjectOfType(typeof(T));
+                if(instance is GameManager)DontDestroyOnLoad(instance);
  
                 if (instance == null)
                 {

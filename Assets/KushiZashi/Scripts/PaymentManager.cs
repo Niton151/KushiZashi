@@ -11,7 +11,7 @@ public class PaymentManager : SingletonMonoBehaviour<PaymentManager>
 {
     [SerializeField] private TMP_Text _fundText;
     [SerializeField] private TMP_Text _upgradeFundText;
-    private int _fund = 50;
+    private int _fund = 110;
 
     public int Fund
     {
@@ -24,15 +24,15 @@ public class PaymentManager : SingletonMonoBehaviour<PaymentManager>
     public void FirstInit()
     {
         _ct = this.GetCancellationTokenOnDestroy();
-        _fundText.text = "総資産:0¥";
-        _upgradeFundText.text = "総資産:0¥";
+        _fundText.text = "総資産:0円";
+        _upgradeFundText.text = "総資産:0円";
 
         UniTaskAsyncEnumerable
             .EveryValueChanged(this, _ => _fund)
             .ForEachAsync(_ =>
             {
-                _fundText.text = $"総資産:{_fund}¥";
-                _upgradeFundText.text = $"総資産:{_fund}¥";
+                _fundText.text = $"総資産:{_fund}円";
+                _upgradeFundText.text = $"総資産:{_fund}円";
             }, _ct);
     }
 }

@@ -80,14 +80,13 @@ public class TimeManager : SingletonMonoBehaviour<TimeManager>
             }, _ct);
     }
 
-    public async void Accelerate(float min1sec, TimeSpan until)
+    public async void Accelerate(float min1sec, DateTime until)
     {
         var temp = _min1sec;
         _min1sec = min1sec;
-        _degree1sec = 0.25f * _min1sec;
-        
+
         SoundManager.Instance.Audio.PlayOneShot(SoundManager.Instance.timeQuick);
-        await UniTask.WaitUntil(() => _now.TimeOfDay >= until, cancellationToken:_ct);
+        await UniTask.WaitUntil(() => _now >= until, cancellationToken:_ct);
 
         _min1sec = temp;
         _degree1sec = 0.25f * _min1sec;

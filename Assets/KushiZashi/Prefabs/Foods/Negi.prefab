@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6814359823839049706}
   - component: {fileID: 7319567910545625666}
   - component: {fileID: -857614118703202327}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Negi
   m_TagString: Untagged
   m_Icon: {fileID: 0}

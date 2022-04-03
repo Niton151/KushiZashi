@@ -7,6 +7,7 @@ public class ItemObjectPool : ObjectPool<BaseItem>
 {
     //ItemのPrefab
     private readonly BaseItem _prefab;
+    
     private readonly ItemObjectPoolProvider _provider;
     
     //ヒエラルキウィンドウ上で親となるTransform
